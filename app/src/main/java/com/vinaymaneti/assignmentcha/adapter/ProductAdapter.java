@@ -12,7 +12,13 @@ import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -27,14 +33,43 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     //Unique Product List -- this is to get the unique elements based on SKU and we store it in List
     private List<FirstSetTransactionModel> uniqueProductList;
     private Context mContext;
+    //to get the count of 1 particular transaction count- i took hash map
+    Map<String, Integer> counts;
 
     public ProductAdapter(Context mContext, List<FirstSetTransactionModel> fakeDatProductList) {
         this.mContext = mContext;
         allProductList = fakeDatProductList;
 
+        if (allProductList.size() > 0) {
+            Collections.sort(allProductList, new Comparator<FirstSetTransactionModel>() {
+                @Override
+                public int compare(FirstSetTransactionModel o1, FirstSetTransactionModel o2) {
+                    return o1.getSku().compareTo(o2.getSku());
+                }
+            });
+        }
+        counts = new HashMap<>();
         uniqueProductList = new ArrayList<>();
         //initially we store first element to uniqueProductList (List) -- because we we wan to compare if exist we won't add else we will add
         uniqueProductList.add(allProductList.get(0));
+
+        //convert List<Object> to String[]
+        List<String> strings = new ArrayList<>(allProductList.size());
+        Collections.sort(strings);
+        //here i make for look to get the sku name
+        for (FirstSetTransactionModel setTransactionModel : allProductList) {
+            strings.add(setTransactionModel != null ? setTransactionModel.getSku() : null);
+        }
+
+        // based on name increment the count
+        for (String s : strings) {
+            if (counts.containsKey(s)) {
+                counts.put(s, counts.get(s) + 1);
+            } else {
+                counts.put(s, 1);
+            }
+        }
+
         //here we make for loop to get the first item from all the allProductList
         for (FirstSetTransactionModel allProductSku : allProductList) {
             // initially we maintain boolean flag if false we won't add to uniqueProductList else if it is true we will add to uniqueProductList
@@ -53,7 +88,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         }
         Log.d("UniqueProductList", uniqueProductList.size() + "");
-
     }
 
     @Override
@@ -65,11 +99,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FirstSetTransactionModel foreRecyclerView = uniqueProductList.get(position);
-//        for (String s : uniList) {
-//            holder.productName.setText(s);
-//        }
         holder.productName.setText(foreRecyclerView.getSku());
-        //holder.transcationName.setText(foreRecyclerView.getAmount());
+        //below map object is used to sort alphabetically from a - z
+        Map<String, Integer> map = new TreeMap<String, Integer>(counts);
+        for (Map.Entry<String, Integer> integerMap : map.entrySet()) {
+            //here I make --  based on product name attach transaction count
+            if (foreRecyclerView.getSku().equals(integerMap.getKey())) {
+                holder.transactionName.setText(String.format(Locale.ENGLISH, "%d %s", integerMap.getValue(), " transactions"));
+            }
+        }
+
     }
 
     @Override
@@ -84,8 +123,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.productName)
         TextView productName;
-        @BindView(R.id.transcationName)
-        TextView transcationName;
+        @BindView(R.id.transactionName)
+        TextView transactionName;
 
         public ViewHolder(View itemView) {
             super(itemView);
