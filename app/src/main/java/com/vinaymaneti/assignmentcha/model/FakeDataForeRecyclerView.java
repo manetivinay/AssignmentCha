@@ -35,7 +35,7 @@ public class FakeDataForeRecyclerView {
     public static ArrayList<FakeDataForeRecyclerView> createFakeDatProductList() {
         ArrayList<FakeDataForeRecyclerView> foreRecyclerViews = new ArrayList<>();
         for (int i = 0; i <= 20; i++) {
-            foreRecyclerViews.add(new FakeDataForeRecyclerView(i + "product ", i + " transaction"));
+            foreRecyclerViews.add(new FakeDataForeRecyclerView(i + " product", i + " transaction"));
         }
         return foreRecyclerViews;
     }

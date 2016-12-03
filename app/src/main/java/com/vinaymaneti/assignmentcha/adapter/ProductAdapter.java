@@ -1,14 +1,15 @@
 package com.vinaymaneti.assignmentcha.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.vinaymaneti.assignmentcha.R;
-import com.vinaymaneti.assignmentcha.model.FakeDataForeRecyclerView;
+import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,12 +22,38 @@ import butterknife.ButterKnife;
  */
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
-    private List<FakeDataForeRecyclerView> mDataForeRecyclerViews;
+    //All product list -- this we get initially when we parse json
+    private List<FirstSetTransactionModel> allProductList;
+    //Unique Product List -- this is to get the unique elements based on SKU and we store it in List
+    private List<FirstSetTransactionModel> uniqueProductList;
     private Context mContext;
 
-    public ProductAdapter(Context mContext, ArrayList<FakeDataForeRecyclerView> fakeDatProductList) {
+    public ProductAdapter(Context mContext, List<FirstSetTransactionModel> fakeDatProductList) {
         this.mContext = mContext;
-        mDataForeRecyclerViews = fakeDatProductList;
+        allProductList = fakeDatProductList;
+
+        uniqueProductList = new ArrayList<>();
+        //initially we store first element to uniqueProductList (List) -- because we we wan to compare if exist we won't add else we will add
+        uniqueProductList.add(allProductList.get(0));
+        //here we make for loop to get the first item from all the allProductList
+        for (FirstSetTransactionModel allProductSku : allProductList) {
+            // initially we maintain boolean flag if false we won't add to uniqueProductList else if it is true we will add to uniqueProductList
+            boolean flag = false;
+            // here we make for loop to get all the uniqueProductList
+            for (FirstSetTransactionModel uniqueProductSku : uniqueProductList) {
+                // here we compare  allProductSku is present in uniqueProductSku -- if it contains we won't add else we will add
+                // if both uniqueProductSku and allProductSku are not equal it means that sku item is nor present then here the flag value is false
+                if (uniqueProductSku.getSku().equals(allProductSku.getSku())) {
+                    flag = true;
+                }
+            }
+            // if flag value is false then add the element to uniqueProductList  - it mean negation of false is true try to add element to uniqueProductList
+            if (!flag)
+                uniqueProductList.add(allProductSku);
+
+        }
+        Log.d("UniqueProductList", uniqueProductList.size() + "");
+
     }
 
     @Override
@@ -37,14 +64,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FakeDataForeRecyclerView foreRecyclerView = mDataForeRecyclerViews.get(position);
-        holder.productName.setText(foreRecyclerView.getProductName());
-        holder.transcationName.setText(foreRecyclerView.getProductName());
+        FirstSetTransactionModel foreRecyclerView = uniqueProductList.get(position);
+//        for (String s : uniList) {
+//            holder.productName.setText(s);
+//        }
+        holder.productName.setText(foreRecyclerView.getSku());
+        //holder.transcationName.setText(foreRecyclerView.getAmount());
     }
 
     @Override
     public int getItemCount() {
-        return mDataForeRecyclerViews.size();
+        return uniqueProductList.size();
     }
 
     public Context getContext() {
@@ -53,9 +83,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.productName)
-        AppCompatTextView productName;
+        TextView productName;
         @BindView(R.id.transcationName)
-        AppCompatTextView transcationName;
+        TextView transcationName;
 
         public ViewHolder(View itemView) {
             super(itemView);
