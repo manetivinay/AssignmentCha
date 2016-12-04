@@ -1,14 +1,18 @@
 package com.vinaymaneti.assignmentcha.adapter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vinaymaneti.assignmentcha.R;
+import com.vinaymaneti.assignmentcha.activities.TransactionActivity;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 
 import java.util.ArrayList;
@@ -98,7 +102,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        FirstSetTransactionModel foreRecyclerView = uniqueProductList.get(position);
+        final FirstSetTransactionModel foreRecyclerView = uniqueProductList.get(position);
         holder.productName.setText(foreRecyclerView.getSku());
         //below map object is used to sort alphabetically from a - z
         Map<String, Integer> map = new TreeMap<String, Integer>(counts);
@@ -108,6 +112,52 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 holder.transactionName.setText(String.format(Locale.ENGLISH, "%d %s", integerMap.getValue(), " transactions"));
             }
         }
+        holder.individualItemLinearLayout.setOnClickListener(new View.OnClickListener() {
+
+
+            @Override
+            public void onClick(View v) {
+//                List<FirstSetTransactionModel> list = new ArrayList<>();
+//                HashMap<String, List<FirstSetTransactionModel>> hashMap = null;
+//                for (FirstSetTransactionModel setTransactionModel : allProductList) {
+//                    hashMap = new HashMap<>();
+//                    if (!hashMap.containsKey(foreRecyclerView.getSku())) {
+//                        list.add(setTransactionModel);
+//
+//                        hashMap.put(foreRecyclerView.getSku(), list);
+//                    } else {
+//                        hashMap.get(foreRecyclerView.getSku()).add(setTransactionModel);
+//                    }
+//
+//                }
+//                Log.d("list : -- ", list.size() + "");
+//                Log.d("hashMap : -- ", hashMap.size() + "");
+
+                Map<String, List<FirstSetTransactionModel>> map = new HashMap<>();
+                List<FirstSetTransactionModel> list1 = null;
+                for (FirstSetTransactionModel student : allProductList) {
+                    String key = student.getSku();
+                    if (map.containsKey(key)) {
+                        list1 = map.get(key);
+                        list1.add(student);
+                    } else {
+                        List<FirstSetTransactionModel> list = new ArrayList<FirstSetTransactionModel>();
+                        list.add(student);
+                        map.put(key, list);
+                    }
+                }
+//                Log.d("list : -- ", list1.size() + "");
+                List<FirstSetTransactionModel> eachProductRelatedTransactions = map.get(foreRecyclerView.getSku());
+//                Log.d("hashMap : -- ", hashMap.size() + "");
+
+                Intent intent = new Intent(getContext(), TransactionActivity.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putParcelable("data", (Parcelable) eachProductRelatedTransactions);
+                intent.putExtra("transactionName", foreRecyclerView.getSku());
+                intent.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) eachProductRelatedTransactions);
+                getContext().startActivity(intent);
+            }
+        });
 
     }
 
@@ -121,6 +171,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.individualItemLinearLayout)
+        LinearLayout individualItemLinearLayout;
         @BindView(R.id.productName)
         TextView productName;
         @BindView(R.id.transactionName)
