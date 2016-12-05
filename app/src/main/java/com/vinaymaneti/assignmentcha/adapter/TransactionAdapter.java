@@ -41,8 +41,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     public void onBindViewHolder(ViewHolder holder, int position) {
         FirstSetTransactionModel foreRecyclerView = mDataForeRecyclerViews.get(position);
         holder.productName.setText(CurrencyType.fromString(foreRecyclerView.getCurrency()) + foreRecyclerView.getAmount());
-        holder.transactionName.setVisibility(View.GONE);
-//        holder.transactionName.setText(foreRecyclerView.getProductName());
+//        holder.transactionName.setVisibility(View.GONE);
+        holder.transactionName.setText(foreRecyclerView.getConvertedCurrency());
     }
 
     public Context getContext() {
@@ -72,7 +72,8 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
         USD("$"),
         CAD("¢"),
         GBP("£"),
-        AUD("A$");
+        AUD("A$"),
+        EUR("€");
 
         private String currencySym;
 
@@ -88,7 +89,7 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
                     }
                 }
             }
-            throw new IllegalArgumentException("No Constant with Currency symbol" + currencySym + "found");
+            throw new IllegalArgumentException("No Constant with Currency symbol" + currencySym + " found");
         }
     }
 }

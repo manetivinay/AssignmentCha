@@ -11,6 +11,7 @@ public class FirstSetTransactionModel implements Parcelable {
     private String amount;
     private String sku;
     private String currency;
+    private String convertedCurrency;
 
     public FirstSetTransactionModel() {
 
@@ -54,6 +55,14 @@ public class FirstSetTransactionModel implements Parcelable {
         return currency;
     }
 
+    public String getConvertedCurrency() {
+        return convertedCurrency;
+    }
+
+    public void setConvertedCurrency(String convertedCurrency) {
+        this.convertedCurrency = convertedCurrency;
+    }
+
     public void setCurrency(String currency) {
         this.currency = currency;
     }
@@ -68,5 +77,15 @@ public class FirstSetTransactionModel implements Parcelable {
         dest.writeString(amount);
         dest.writeString(sku);
         dest.writeString(currency);
+    }
+
+    @Override
+    public String toString() {
+        return "FirstSetTransactionModel{" +
+                "amount='" + amount + '\'' +
+                ", sku='" + sku + '\'' +
+                ", currency='" + currency + '\'' +
+                ", convertedCurrency='" + convertedCurrency + '\'' +
+                '}';
     }
 }
