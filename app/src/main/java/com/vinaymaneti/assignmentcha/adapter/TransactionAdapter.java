@@ -81,6 +81,10 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
             this.currencySym = currencySym;
         }
 
+        public String getCurrencySym() {
+            return currencySym;
+        }
+
         public static String fromString(String currencySym) {
             if (currencySym != null) {
                 for (CurrencyType currencyType : CurrencyType.values()) {

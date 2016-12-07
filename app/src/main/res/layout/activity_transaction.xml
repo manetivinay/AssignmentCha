@@ -38,7 +38,6 @@
             android:layout_marginTop="10dp"
             android:textColor="@android:color/black"
             android:textSize="24sp"
-            android:textStyle="bold"
             tools:text="Total : $9,609.17"/>
 
         <android.support.v7.widget.RecyclerView

@@ -19,6 +19,7 @@ import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 import com.vinaymaneti.assignmentcha.util.ParseJson;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
 
 import butterknife.BindView;
@@ -63,7 +64,10 @@ public class TransactionActivity extends AppCompatActivity {
         }
 
         //here after converting all the currency to USD need to add
-        totalTextView.setText("Total :- " + sumOfAllTransaction() + "");
+        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
+        symbols.setGroupingSeparator(',');
+        DecimalFormat formatter = new DecimalFormat("###,###.##", symbols);
+        totalTextView.setText("Total: " + TransactionAdapter.CurrencyType.fromString("GBP") + formatter.format(sumOfAllTransaction()) + "");
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -95,26 +99,55 @@ public class TransactionActivity extends AppCompatActivity {
             //if rate is less than zero mean  there there is no direct conversion
             // then we need to convert to the currency into appropriate one to give final currency
             //then we ge teh model
-            FirstSetRatesModel model = findAvailable(firstSetRatesModels, from.getCurrency());
-
-            if (model != null) {
-                String toCurrency = model.getTo();
-                //this is same as above get the rate
-                double rateOfFromAndToCurrency = findRate(firstSetRatesModels, from.getCurrency(), toCurrency);
-                //and multiply rate with from amount
-                double newAmount = Double.parseDouble(from.getAmount()) * rateOfFromAndToCurrency;
-                //and at last is Currency to GBP and get the rate
-                double newRate = findRate(firstSetRatesModels, toCurrency, "GBP");
-                if (newRate != 0) {
-                    //if new one greater than multiply newAmount * newRate
-                    return newAmount * newRate;
-                } else {
-                    return getFromOutSide();
+            FirstSetRatesModel model;
+            boolean good = false;
+            double rateOfFromAndToCurrency;
+            double newAmount = 0;
+            double newRate = 0;
+            double finalAmount = 0;
+            double someAmount = 0;
+            String someCurrency = null;
+            do {
+                if (someAmount != 0)
+                    model = findAvailable(firstSetRatesModels, someCurrency);
+                else
+                    model = findAvailable(firstSetRatesModels, from.getCurrency());
+                if (model != null) {
+                    String toCurrency = model.getTo();
+                    //this is same as above get the rate
+                    if (someAmount != 0)
+                        rateOfFromAndToCurrency = findRate(firstSetRatesModels, model.getFrom(), model.getTo());
+                    else
+                        rateOfFromAndToCurrency = findRate(firstSetRatesModels, from.getCurrency(), toCurrency);
+                    //and multiply rate with from amount
+                    if (someAmount != 0)
+                        newAmount = someAmount * rateOfFromAndToCurrency;
+                    else
+                        newAmount = Double.parseDouble(from.getAmount()) * rateOfFromAndToCurrency;
+                    //and at last is Currency to GBP and get the rate
+                    if (someAmount != 0)
+                        newRate = findRate(firstSetRatesModels, toCurrency, "GBP");
+                    else
+                        newRate = findRate(firstSetRatesModels, toCurrency, "GBP");
+                    if (newRate != 0) {
+                        //if new one greater than multiply newAmount * newRate
+                        good = true;
+                        finalAmount = newAmount * newRate;
+                    } else {
+                        good = false;
+                        someAmount = newAmount;
+                        someCurrency = toCurrency;
+//                        model = findAvailable(firstSetRatesModels, toCurrency);
+                        //return getFromOutSide();
+                    }
                 }
-            } else {
-                return getFromOutSide();
-            }
+            } while (!good);
+            return finalAmount;
+//            } else {
+//                return getFromOutSide();
+//            }
         }
+//        return getFromOutSide();
     }
 
     private double getFromOutSide() {
