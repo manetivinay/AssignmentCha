@@ -21,6 +21,7 @@ public class FirstSetTransactionModel implements Parcelable {
         amount = in.readString();
         sku = in.readString();
         currency = in.readString();
+        convertedCurrency = in.readString();
     }
 
     public static final Creator<FirstSetTransactionModel> CREATOR = new Creator<FirstSetTransactionModel>() {
@@ -77,6 +78,7 @@ public class FirstSetTransactionModel implements Parcelable {
         dest.writeString(amount);
         dest.writeString(sku);
         dest.writeString(currency);
+        dest.writeString(convertedCurrency);
     }
 
     @Override

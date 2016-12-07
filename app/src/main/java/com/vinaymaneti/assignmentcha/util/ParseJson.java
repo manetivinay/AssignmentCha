@@ -2,6 +2,7 @@ package com.vinaymaneti.assignmentcha.util;
 
 import android.content.Context;
 
+import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.model.FirstSetRatesModel;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 
@@ -39,9 +40,9 @@ public class ParseJson {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 FirstSetTransactionModel firstSetTransactionData = new FirstSetTransactionModel();
-                firstSetTransactionData.setAmount(jsonObject.getString("amount"));
-                firstSetTransactionData.setSku(jsonObject.getString("sku"));
-                firstSetTransactionData.setCurrency(jsonObject.getString("currency"));
+                firstSetTransactionData.setAmount(jsonObject.getString(context.getString(R.string.json_transaction_amount)));
+                firstSetTransactionData.setSku(jsonObject.getString(context.getString(R.string.json_transaction_sku)));
+                firstSetTransactionData.setCurrency(jsonObject.getString(context.getString(R.string.json_transaction_currency)));
 
                 //add all values to ArrayList
                 firstSetTransactionModelArrayList.add(firstSetTransactionData);
@@ -73,9 +74,9 @@ public class ParseJson {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 FirstSetRatesModel firstSetRatesModel = new FirstSetRatesModel();
-                firstSetRatesModel.setFrom(jsonObject.getString("from"));
-                firstSetRatesModel.setRate(jsonObject.getString("rate"));
-                firstSetRatesModel.setTo(jsonObject.getString("to"));
+                firstSetRatesModel.setFrom(jsonObject.getString(context.getString(R.string.json_rates_from)));
+                firstSetRatesModel.setRate(jsonObject.getString(context.getString(R.string.json_rates_rate)));
+                firstSetRatesModel.setTo(jsonObject.getString(context.getString(R.string.json_rates_to)));
 
                 //add all values to ArrayList
                 firstSetTransactionModels.add(firstSetRatesModel);

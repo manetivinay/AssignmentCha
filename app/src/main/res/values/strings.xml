@@ -5,4 +5,10 @@
     <string name="total_gbp_decimal_format">###,###.##</string>
     <string name="strig_gbp">GBP</string>
     <string name="total_str">"Total: "</string>
+    <string name="json_transaction_amount">amount</string>
+    <string name="json_transaction_sku">sku</string>
+    <string name="json_transaction_currency">currency</string>
+    <string name="json_rates_from">from</string>
+    <string name="json_rates_rate">rate</string>
+    <string name="json_rates_to">to</string>
 </resources>
