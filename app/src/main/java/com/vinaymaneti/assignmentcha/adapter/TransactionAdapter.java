@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,9 +41,12 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         FirstSetTransactionModel foreRecyclerView = mDataForeRecyclerViews.get(position);
-        holder.productName.setText(CurrencyType.fromString(foreRecyclerView.getCurrency()) + foreRecyclerView.getAmount());
-//        holder.transactionName.setVisibility(View.GONE);
-        holder.transactionName.setText(foreRecyclerView.getConvertedCurrency());
+        DecimalFormat formatter = new DecimalFormat(getContext().getString(R.string.after_convert_to_gbp_decimal_format));
+        String strAmount = foreRecyclerView.getAmount();
+        Double dble = Double.valueOf(String.valueOf(strAmount));
+        System.out.println(formatter.format(dble));
+        holder.productName.setText(CurrencyType.fromString(foreRecyclerView.getCurrency()) + formatter.format(dble));
+        holder.transactionName.setText(CurrencyType.fromString(getContext().getString(R.string.strig_gbp)) + foreRecyclerView.getConvertedCurrency());
     }
 
     public Context getContext() {

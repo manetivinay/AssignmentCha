@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -16,6 +15,7 @@ import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.adapter.TransactionAdapter;
 import com.vinaymaneti.assignmentcha.model.FirstSetRatesModel;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
+import com.vinaymaneti.assignmentcha.util.Constants;
 import com.vinaymaneti.assignmentcha.util.ParseJson;
 
 import java.text.DecimalFormat;
@@ -37,8 +37,6 @@ public class TransactionActivity extends AppCompatActivity {
     RecyclerView transactionRecyclerView;
     private String transactionName = null;
     private List<FirstSetTransactionModel> firstSetTransactionModels = null;
-    double result = 0;
-    double rate = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,37 +44,34 @@ public class TransactionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_transaction);
         ButterKnife.bind(this);
 
-        List<FirstSetRatesModel> firstSetRatesModels = ParseJson.loadRatesJSONFromAsset(this, "rates.json");
+        List<FirstSetRatesModel> firstSetRatesModels = ParseJson.loadRatesJSONFromAsset(this, Constants.RATES_JSON);
 
         Intent intent = this.getIntent();
         if (intent != null) {
-            transactionName = intent.getStringExtra("transactionName");
-            firstSetTransactionModels = intent.getParcelableArrayListExtra("data");
+            transactionName = intent.getStringExtra(Constants.TRANSACTION_NAME);
+            firstSetTransactionModels = intent.getParcelableArrayListExtra(Constants.DATA);
         }
 
         for (FirstSetTransactionModel setTransactionModel : firstSetTransactionModels) {
-            //convertAllCurrencyToGBP(setTransactionModel, firstSetRatesModel);
             double result = convertFromXToGBP(firstSetRatesModels, setTransactionModel);
-            DecimalFormat decimalFormat = new DecimalFormat("#.00");
+            DecimalFormat decimalFormat = new DecimalFormat(getString(R.string.after_convert_to_gbp_decimal_format));
             double rawPercent = result * 1.00;
             setTransactionModel.setConvertedCurrency("" + decimalFormat.format(rawPercent));
-            Log.d(TAG, "--> FirstSetTransactionModel: " + setTransactionModel.toString());
         }
 
         //here after converting all the currency to USD need to add
         DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
         symbols.setGroupingSeparator(',');
-        DecimalFormat formatter = new DecimalFormat("###,###.##", symbols);
-        totalTextView.setText("Total: " + TransactionAdapter.CurrencyType.fromString("GBP") + formatter.format(sumOfAllTransaction()) + "");
+        DecimalFormat formatter = new DecimalFormat(getString(R.string.total_gbp_decimal_format), symbols);
+        totalTextView.setText(getString(R.string.total_str) + TransactionAdapter.CurrencyType.fromString(getString(R.string.strig_gbp)) + formatter.format(sumOfAllTransaction()) + "");
 
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(String.format("%s %s", "Transactions for ", transactionName));
+            getSupportActionBar().setTitle(String.format("%s %s", getString(R.string.transaction_for), transactionName));
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
         // Load the data from Asset folder -json file
-//        List<FirstSetTransactionModel> firstSetTransactionModels = loadJSONFromAsset(this, "transactions.json");
         //handle the data collection and bind it to the view  -- here i'm passing in sample fake data to display in recycler view
         TransactionAdapter productAdapter = new TransactionAdapter(this, firstSetTransactionModels);
         //attach the adapter to recycler view to populate data/items
@@ -88,10 +83,10 @@ public class TransactionActivity extends AppCompatActivity {
 
     private double convertFromXToGBP(List<FirstSetRatesModel> firstSetRatesModels, FirstSetTransactionModel from) {
         //if from currency and is Equal to GBp no need to convert
-        if (from.getCurrency().equalsIgnoreCase("GBP"))
+        if (from.getCurrency().equalsIgnoreCase(getString(R.string.strig_gbp)))
             return Double.parseDouble(from.getAmount());
         //if from currency is different then compare with json rates and get the rate from json
-        double rate = findRate(firstSetRatesModels, from.getCurrency(), "GBP");
+        double rate = findRate(firstSetRatesModels, from.getCurrency(), getString(R.string.strig_gbp));
         //if rate is greater then value 0 then multiply it with amount
         if (rate != 0) {
             return Double.parseDouble(from.getAmount()) * rate;
@@ -100,60 +95,48 @@ public class TransactionActivity extends AppCompatActivity {
             // then we need to convert to the currency into appropriate one to give final currency
             //then we ge teh model
             FirstSetRatesModel model;
-            boolean good = false;
+            boolean repeatProcessConversion = false;
             double rateOfFromAndToCurrency;
-            double newAmount = 0;
-            double newRate = 0;
+            double newAmount;
+            double newRate;
             double finalAmount = 0;
-            double someAmount = 0;
-            String someCurrency = null;
+            double nextRepeatAmount = 0;
+            String nextRepeatCurrency = null;
             do {
-                if (someAmount != 0)
-                    model = findAvailable(firstSetRatesModels, someCurrency);
+                if (nextRepeatAmount != 0)
+                    model = findAvailable(firstSetRatesModels, nextRepeatCurrency);
                 else
                     model = findAvailable(firstSetRatesModels, from.getCurrency());
                 if (model != null) {
                     String toCurrency = model.getTo();
-                    //this is same as above get the rate
-                    if (someAmount != 0)
+                    if (nextRepeatAmount != 0) {
                         rateOfFromAndToCurrency = findRate(firstSetRatesModels, model.getFrom(), model.getTo());
-                    else
+                        newAmount = nextRepeatAmount * rateOfFromAndToCurrency;
+                    } else {
                         rateOfFromAndToCurrency = findRate(firstSetRatesModels, from.getCurrency(), toCurrency);
-                    //and multiply rate with from amount
-                    if (someAmount != 0)
-                        newAmount = someAmount * rateOfFromAndToCurrency;
-                    else
                         newAmount = Double.parseDouble(from.getAmount()) * rateOfFromAndToCurrency;
-                    //and at last is Currency to GBP and get the rate
-                    if (someAmount != 0)
-                        newRate = findRate(firstSetRatesModels, toCurrency, "GBP");
-                    else
-                        newRate = findRate(firstSetRatesModels, toCurrency, "GBP");
+                    }
+
+                    newRate = findRate(firstSetRatesModels, toCurrency, getString(R.string.strig_gbp));
                     if (newRate != 0) {
                         //if new one greater than multiply newAmount * newRate
-                        good = true;
+                        repeatProcessConversion = true;
                         finalAmount = newAmount * newRate;
                     } else {
-                        good = false;
-                        someAmount = newAmount;
-                        someCurrency = toCurrency;
-//                        model = findAvailable(firstSetRatesModels, toCurrency);
-                        //return getFromOutSide();
+                        repeatProcessConversion = false;
+                        nextRepeatAmount = newAmount;
+                        nextRepeatCurrency = toCurrency;
                     }
                 }
-            } while (!good);
+            } while (!repeatProcessConversion);
             return finalAmount;
-//            } else {
-//                return getFromOutSide();
-//            }
         }
-//        return getFromOutSide();
     }
 
-    private double getFromOutSide() {
-        // Do something
-        return 0;
-    }
+//    private double getFromOutSide() {
+//        // Do something
+//        return 0;
+//    }
 
 
     private double findRate(List<FirstSetRatesModel> firstSetRatesModels, String from, String to) {

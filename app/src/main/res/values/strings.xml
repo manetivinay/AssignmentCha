@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AssignmentCha</string>
+    <string name="transaction_for">"Transactions for "</string>
+    <string name="after_convert_to_gbp_decimal_format">#.00</string>
+    <string name="total_gbp_decimal_format">###,###.##</string>
+    <string name="strig_gbp">GBP</string>
+    <string name="total_str">"Total: "</string>
 </resources>

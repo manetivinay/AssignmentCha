@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +13,7 @@ import android.widget.TextView;
 import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.activities.TransactionActivity;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
+import com.vinaymaneti.assignmentcha.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -91,7 +91,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 uniqueProductList.add(allProductSku);
 
         }
-        Log.d("UniqueProductList", uniqueProductList.size() + "");
+        //Log.d("UniqueProductList", uniqueProductList.size() + "");
     }
 
     @Override
@@ -102,13 +102,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final FirstSetTransactionModel foreRecyclerView = uniqueProductList.get(position);
-        holder.productName.setText(foreRecyclerView.getSku());
+        final FirstSetTransactionModel bindModel = uniqueProductList.get(position);
+        holder.productName.setText(bindModel.getSku());
         //below map object is used to sort alphabetically from a - z
         Map<String, Integer> map = new TreeMap<String, Integer>(counts);
         for (Map.Entry<String, Integer> integerMap : map.entrySet()) {
             //here I make --  based on product name attach transaction count
-            if (foreRecyclerView.getSku().equals(integerMap.getKey())) {
+            if (bindModel.getSku().equals(integerMap.getKey())) {
                 holder.transactionName.setText(String.format(Locale.ENGLISH, "%d %s", integerMap.getValue(), " transactions"));
             }
         }
@@ -117,22 +117,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
             @Override
             public void onClick(View v) {
-//                List<FirstSetTransactionModel> list = new ArrayList<>();
-//                HashMap<String, List<FirstSetTransactionModel>> hashMap = null;
-//                for (FirstSetTransactionModel setTransactionModel : allProductList) {
-//                    hashMap = new HashMap<>();
-//                    if (!hashMap.containsKey(foreRecyclerView.getSku())) {
-//                        list.add(setTransactionModel);
-//
-//                        hashMap.put(foreRecyclerView.getSku(), list);
-//                    } else {
-//                        hashMap.get(foreRecyclerView.getSku()).add(setTransactionModel);
-//                    }
-//
-//                }
-//                Log.d("list : -- ", list.size() + "");
-//                Log.d("hashMap : -- ", hashMap.size() + "");
-
                 Map<String, List<FirstSetTransactionModel>> map = new HashMap<>();
                 List<FirstSetTransactionModel> list1 = null;
                 for (FirstSetTransactionModel student : allProductList) {
@@ -146,15 +130,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                         map.put(key, list);
                     }
                 }
-//                Log.d("list : -- ", list1.size() + "");
-                List<FirstSetTransactionModel> eachProductRelatedTransactions = map.get(foreRecyclerView.getSku());
-//                Log.d("hashMap : -- ", hashMap.size() + "");
+                List<FirstSetTransactionModel> eachProductRelatedTransactions = map.get(bindModel.getSku());
 
                 Intent intent = new Intent(getContext(), TransactionActivity.class);
-//                Bundle bundle = new Bundle();
-//                bundle.putParcelable("data", (Parcelable) eachProductRelatedTransactions);
-                intent.putExtra("transactionName", foreRecyclerView.getSku());
-                intent.putParcelableArrayListExtra("data", (ArrayList<? extends Parcelable>) eachProductRelatedTransactions);
+                intent.putExtra(Constants.TRANSACTION_NAME, bindModel.getSku());
+                intent.putParcelableArrayListExtra(Constants.DATA, (ArrayList<? extends Parcelable>) eachProductRelatedTransactions);
                 getContext().startActivity(intent);
             }
         });

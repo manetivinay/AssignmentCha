@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import com.vinaymaneti.assignmentcha.R;
 import com.vinaymaneti.assignmentcha.adapter.ProductAdapter;
 import com.vinaymaneti.assignmentcha.model.FirstSetTransactionModel;
+import com.vinaymaneti.assignmentcha.util.Constants;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class ProductActivity extends AppCompatActivity {
         //Here I use butter knife to eliminate boiler plate code
         ButterKnife.bind(this);
         // Load the data from Asset folder -json file
-        List<FirstSetTransactionModel> firstSetTransactionModels = loadJSONFromAsset(this, "transactions.json");
+        List<FirstSetTransactionModel> firstSetTransactionModels = loadJSONFromAsset(this, Constants.TRANSACTION_JSON);
         //handle the data collection and bind it to the view  -- here i'm passing in sample fake data to display in recycler view
         ProductAdapter productAdapter = new ProductAdapter(this, firstSetTransactionModels);
         //attach the adapter to recycler view to populate data/items
